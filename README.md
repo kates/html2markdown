@@ -1,4 +1,4 @@
-# Markdown
+# HTML2Markdown
 
 Javascript Implementation for converting HTML to Markdown text.
 
