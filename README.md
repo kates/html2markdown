@@ -25,3 +25,13 @@ This call will return convert the html and return the mardown string like ""# H1
 * Dropped wordwrap function as it does not seem a good idea to introduce new lines in the converter. and wordwrap behaviro was not consistents as elements can be nested.
 * Added support for refeence style images and links (option driven to choose between inline markdown formatting and refernce style formatting)
 * Added ton's of unit tests.
+
+## Known conversion issues
+
+If HTML tag is of following form. Then, currently showdown fails to render 
+
+        <a href="/some_link">
+            <h1>
+                    <img src="/some_image_lin"/>
+            </h1>
+        </a>                

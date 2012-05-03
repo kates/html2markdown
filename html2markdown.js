@@ -15,7 +15,6 @@
  */
 
 if (typeof require != "undefined") {
-	console.log("req exists" );
 	var htmlparser = require("./htmldomparser");
 	var HTMLParser = htmlparser.HTMLParser;
 }
@@ -26,6 +25,18 @@ if (typeof require != "undefined") {
  * @return converted markdown text
  */
 function HTML2Markdown(html, opts) {
+	var logging = false;
+	var nodeList = [];
+	var listTagStack = [];
+	var linkAttrStack = [];
+	var blockquoteStack = [];
+	var preStack = [];
+	
+	var links = [];
+	
+	opts = opts || {};
+	var inlineStyle = opts['inlineStyle'] || false;
+
 	var markdownTags = {
 		"hr": "- - -\n\n",
 		"br": "  \n",
@@ -50,6 +61,17 @@ function HTML2Markdown(html, opts) {
 		"blockquote": "> "
 	};
 
+	function getListMarkdownTag() {
+		var listItem = "";		
+		if(listTagStack) {
+			for ( var i = 0; i < listTagStack.length - 1; i++) {
+				listItem += "  ";
+			}			
+		}
+		listItem += peek(listTagStack);		
+		return listItem;
+	}
+	
 	function convertAttrs(attrs) {
 		var attributes = {};
 		for(var k in attrs) {
@@ -59,23 +81,45 @@ function HTML2Markdown(html, opts) {
 		return attributes;
 	}
 
-	var logging = false;
-	var nodeList = [];
-	var listTagStack = [];
-	var linkAttrStack = [];
-	var blockquoteStack = [];
-	var preStack = [];
-	
-	var links = [];
-	
-	opts = opts || {};
-	var inlineStyle = opts['inlineStyle'] || false;
-
 	function peek(list) {
 		if(list && list.length > 0) {
 			return list.slice(-1)[0];	
 		} 
 		return "";		
+	}
+
+	function peekTillNotEmpty(list) {
+		if(!list) {
+			return "";
+		}
+				
+		for(var i = list.length - 1; i>=0; i-- ){
+			if(list[i] != "") {
+				return list[i];
+			} 		
+		}		
+		return "";
+	}
+	
+	function removeIfEmptyTag(start) {
+		var cleaned = false;
+		if(start == peekTillNotEmpty(nodeList)) {
+			while(peek(nodeList) != start) {
+				nodeList.pop();
+			}
+			nodeList.pop();
+			cleaned = true;
+		} 
+		return cleaned;
+	}
+	
+	function sliceText(start) {
+		var text = [];
+		while(nodeList.length > 0 && peek(nodeList) != start) {
+			var t = nodeList.pop();
+			text.unshift(t);
+		}
+		return text.join("");
 	}
 	
 	function block(isEndBlock) {
@@ -92,12 +136,11 @@ function HTML2Markdown(html, opts) {
 			} else if(/\s*\n\s*$/.test(lastItem)) {
 				lastItem = lastItem.replace(/\s*\n\s*$/, "\n");
 				block = "\n";
-			} else if(/\s+$/.test(lastItem)) {
-				lastItem = lastItem.replace(/\s+$/, "");
+			} else if(/\s+$/.test(lastItem)) {				
 				block = "\n\n";
 			} else {
 				block = "\n\n";
-			}
+			} 
 			
 			nodeList.push(lastItem);
 			nodeList.push(block);	
@@ -177,8 +220,6 @@ function HTML2Markdown(html, opts) {
 				case "p":
 				case "div":				
 				case "td":
-				//NOTE even though span tag is an inline element, handling it as block element for readability.
-				//Remove it if it results in poor readability	
 					block();
 					break;
 				case "ul":
@@ -193,12 +234,8 @@ function HTML2Markdown(html, opts) {
 					}										
 					break;
 				case "li":
-				case "dt":	
-					var li = "";
-					for ( var i = 0; i < listTagStack.length - 1; i++) {
-						li += "  ";
-					}
-					li += peek(listTagStack);
+				case "dt":
+					var li = getListMarkdownTag();
 					nodeList.push(li);
 					break;
 				case "a":					
@@ -217,10 +254,9 @@ function HTML2Markdown(html, opts) {
 					
 					attribs['alt'] ? alt = attribs['alt'].value.trim() : alt = "";
 					attribs['title'] ? title = attribs['title'].value.trim() : title = "";
-					
-					
+										
 					// if parent of image tag is nested in anchor tag use inline style
-					if(!inlineStyle && !peek(nodeList).startsWith("[")) {						
+					if(!inlineStyle && !peekTillNotEmpty(nodeList).startsWith("[")) {						
 						var l = links.indexOf(url);
 						if(l == -1) {
 							links.push(url);
@@ -238,13 +274,16 @@ function HTML2Markdown(html, opts) {
 						nodeList.push("][" + l + "]");
 						block();
 					} else {
-//						if(listTagStack.length > 0 && (/^\s+[\*]$/.test(peek(nodeList)) || /^\s+1\.$/.test(peek(nodeList)) )) {
-//							nodeList.pop();
-//						} 
-						//treat images as block elements
-						block();
+						//if image is not a link image then treat images as block elements
+						if(!peekTillNotEmpty(nodeList).startsWith("[")) {
+							block();	
+						}
+						
 						nodeList.push("![" + alt + "](" + url + (title ? " \"" + title + "\"" : "") + ")");
-						block(true);
+						
+						if(!peekTillNotEmpty(nodeList).startsWith("[")) {
+							block(true);	
+						}
 					}
 					break;	
 				case "blockquote":
@@ -259,22 +298,16 @@ function HTML2Markdown(html, opts) {
 					break;
 				}				
 			},
-
 			chars: function(text) {			
 				if(preStack.length > 0) {
 					text = "    " + text.replace(/\n/g,"\n    ");
 				} else if(text.trim() != "") {
 					text = text.replace(/\s+/g, " ");
-//					text = wordwrap(text);					
-					if(peek(nodeList) == "") {
-						nodeList.pop();
-						if(/\s+$/.test(peek(nodeList))) {
-							text = text.replace(/^\s+/g, "");	
-						}	
-						nodeList.push("");
-					} else if(/\s+$/.test(peek(nodeList))) {
+					
+					var prevText = peekTillNotEmpty(nodeList);
+					if(/\s+$/.test(prevText)) {
 						text = text.replace(/^\s+/g, "");
-					}
+					}	
 				} else {
 					nodeList.push("");
 					return;
@@ -286,7 +319,6 @@ function HTML2Markdown(html, opts) {
 				
 				nodeList.push(text);
 			},
-
 			end: function(tag) {
 				tag = tag.toLowerCase();
 				if(logging) {
@@ -300,19 +332,14 @@ function HTML2Markdown(html, opts) {
 				case "h4":
 				case "h5":
 				case "h6":
-					if(peek(nodeList).trim() == "") {
-						nodeList.pop();
-						if(peek(nodeList) == markdownTags[tag]) {
-							nodeList.pop();
-						}						
-					} else {
+					if(!removeIfEmptyTag(markdownTags[tag])) {
 						block(true);
 					}
 					break;
 				case "p":
 				case "div":
 				case "td":
-					if(peek(nodeList).trim() == "") {
+					while(nodeList.length > 0 && peek(nodeList).trim() == "") {
 						nodeList.pop();
 					}
 					block(true);
@@ -324,24 +351,13 @@ function HTML2Markdown(html, opts) {
 				case "dfn": 
 				case "var": 	
 				case "cite":
-					if(peek(nodeList) == "") {
-						nodeList.pop();						
-						if(peek(nodeList) == markdownTags[tag]) {
-							nodeList.pop();
-						}						
-					} else {
-						var text = nodeList.pop().trim();
-						nodeList.push(text);
+					if(!removeIfEmptyTag(markdownTags[tag])) {						
+						nodeList.push(sliceText(markdownTags[tag]).trim());
 						nodeList.push(markdownTags[tag]);
 					}
 					break;
 				case "a":
-					var anchorText = [];
-					while(peek(nodeList) != '[') {
-						anchorText.unshift(nodeList.pop());
-					}
-										
-					var text = anchorText.join("");
+					var text = sliceText("[");
 					text = text.replace(/\s+/g, " ");					
 					text = text.trim();
 					
@@ -393,13 +409,20 @@ function HTML2Markdown(html, opts) {
 					break;
 				case "li":
 				case "dt":
-					if(peek(nodeList) == "") {
-						nodeList.pop();
-						if(/^\s+[\*]$/.test(peek(nodeList)) || /^\s+1\.$/.test(peek(nodeList)) ) {						
-							nodeList.pop();
+					var li = getListMarkdownTag();
+					if(!removeIfEmptyTag(li)) {
+						var text = sliceText(li).trim();
+						
+						if(text.startsWith("[![")) {
+							nodeList.pop();							
+							block();
+							nodeList.push(text);
+							block(true);
+						} else {
+							nodeList.push(text);
+							listBlock();
 						}
 					}	
-					listBlock();	
 					break;
 				case "blockquote":
 					blockquoteStack.pop();
@@ -432,7 +455,7 @@ function HTML2Markdown(html, opts) {
 				}
 				
 			}
-		}, {"nodesToIgnore": ["script", "noscript", "object", "iframe", "frame", "head", "style"]});
+		}, {"nodesToIgnore": ["script", "noscript", "object", "iframe", "frame", "head", "style", "label"]});
 		
 		if(!inlineStyle) {							
 			for ( var i = 0; i < links.length; i++) {

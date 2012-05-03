@@ -54,8 +54,7 @@ describe("HTML2Markdown", function() {
 		expect(md).toMatch(/\# This is document Title\n\n/);
 	}); 
 	
-	//test to verify that inline element render correctly when they start/finish with space
-	it("should be able to convert '<strong> String </strong>' to '**String**'", function() {
+	it("should be able trim text inside inline elements", function() {
 		var md = HTML2Markdown("<strong> String </strong>");
 		expect(md).toMatch(/\*{2}String\*{2}/);
 	});
@@ -79,20 +78,6 @@ describe("HTML2Markdown", function() {
 		var md = HTML2Markdown("This has <strong>blocked and <em>italicized</em></strong> texts.");
 		expect(md).toMatch(/This has \*{2}blocked and \_italicized\_\*{2} texts\./);
 	});
-
-	
-	//test for block 
-	//TODO (verify this test how is this testing block function)
-//	it("should be able to convert '<h1>H1</h1>this is text' to '# H1\\n\\nthis is text'", function() {
-//		var md = HTML2Markdown("<h1>H1</h1>this is text");
-//		expect(md).toMatch(/\# H1\n\nthis is text/);
-//	});
-//	
-//	it("should be able to convert 'this is text<h1>H1</h1>' to 'this is text# H1\\n\\n'", function() {
-//		var md = HTML2Markdown("this is text<h1>H1</h1>");
-//		console.log(md);
-//		expect(md).toMatch(/this is text\n\n\# H1\n\n/);
-//	});
 	
 	it("should be able to convert 'this is text before hr<hr/>this is text after hr' to 'this is text before hr  \\nthis is text after hr'", function() {
 		var md = HTML2Markdown("this is text before hr<hr/>this is text after hr");
@@ -111,7 +96,6 @@ describe("HTML2Markdown", function() {
 
 	it("should be able to convert 'this is text before paragraph<p>This is a paragraph</p>this is text after paragraph' to 'this is text before paragraph\nThis is a paragraph\n\nthis is text after paragraph'", function() {
 		var md = HTML2Markdown("this is text before paragraph<p>This is a paragraph</p>this is text after paragraph");
-		console.log(md);
 		expect(md).toEqual("this is text before paragraph\n\nThis is a paragraph\n\nthis is text after paragraph");
 	});
 
@@ -131,10 +115,8 @@ describe("HTML2Markdown", function() {
 		expect(md).toMatch("> This is blockquoted");
 	});
 	
-	//nested blockquote
-	it("should be able to convert '<blockquote>This is blockquoted<blockquote>This is nested blockquoted</blockquote></blockquote>' to '> This is blockquoted'", function() {
+	it("should be able to convert nested blockquotes", function() {
 		var md = HTML2Markdown("<blockquote>This is blockquoted<blockquote>This is nested blockquoted</blockquote></blockquote>");
-		console.log(md);
 		expect(md).toMatch("> This is blockquoted\n\n> > This is nested blockquoted");
 	});
 	
@@ -159,7 +141,6 @@ describe("HTML2Markdown", function() {
 	
 	it("should be able to convert nested lists", function() {
 		var md = HTML2Markdown("<ul><li>item a<ul><li>item aa</li><li>item bb</li></ul></li><li>item b</li></ul>");		
-		console.log(md);
 		expect(md).toMatch(/\* item a\n  \* item aa\n  \* item bb\n\* item b\n/);		
 	});
 
@@ -222,7 +203,6 @@ describe("HTML2Markdown", function() {
 		expected += "[1]: http://www.example1.com";
 		
 		var md = HTML2Markdown(html);
-		console.log(md);
 		expect(md).toEqual(expected);
 	});
 	
@@ -234,7 +214,6 @@ describe("HTML2Markdown", function() {
 	it("should not convert if link has no text to display", function() {
 		var html = "<a href='/'/>";
 		md = HTML2Markdown(html);
-		console.log(md);		
 		expect(md).toEqual("");
 		
 		html = "<div class='logo'>\n";
@@ -248,12 +227,10 @@ describe("HTML2Markdown", function() {
 	it("should convert elements with child elements surrounded by whitespace", function() {
 		var html = "<div>\n\t<h2>\n\t\t<a href='http://finance.yahoo.com'>Yahoo! Finance</a>\n\t</h2>\n</div>";
 		md = HTML2Markdown(html);
-		console.log(md);		
 		expect(md).toEqual("## [Yahoo! Finance][0]\n\n[0]: http://finance.yahoo.com");
 		
 		html = "<span>\n\t<b>Hello</b>\n\t</span>";
 		md = HTML2Markdown(html);
-		console.log(md);		
 		expect(md).toEqual(" **Hello** ");		
 	});
 	
@@ -261,32 +238,31 @@ describe("HTML2Markdown", function() {
 	it("should convert image wrapped in anchor to markdown that can be rendered using showdown - inline style parsing", function() {
 		var md = HTML2Markdown("<a href=\"/exec/j/4/?pid=62838&lno=1&afsrc=1\"><img alt=\"Example Image\" title=\"Free example image\" src=\"/img/62838.jpg\"></a>", {"inlineStyle": true});		
 		var expected = "[![Example Image]("+ base +"/img/62838.jpg \"Free example image\")]("+base+"/exec/j/4/?pid=62838&lno=1&afsrc=1)";
-		console.log(md);
-		console.log(expected);
 		expect(md).toEqual(expected);
 	});
 
 	it("should convert image wrapped in anchor to markdown that can be rendered using showdown - reference style parsing", function() {
-		var md = HTML2Markdown("<a href=\"/exec/j/4/?pid=62838&lno=1&afsrc=1\"><img alt=\"Example Image\" title=\"Free example image\" src=\"/img/62838.jpg\"></a>", {"inlineStyle": false});		
+		var md = HTML2Markdown("<a href='/exec/j/4/?pid=62838&lno=1&afsrc=1'><img alt='Example Image' title='Free example image' src='/img/62838.jpg'></a>", {"inlineStyle": false});		
 		var expected = "[![Example Image]("+ base +"/img/62838.jpg \"Free example image\")]("+base+"/exec/j/4/?pid=62838&lno=1&afsrc=1)";
-		console.log(md);
-		console.log(expected);
+		
+		var html = "<a href='/exec/j/4/?pid=62838&lno=1&afsrc=1'>\n\t<img alt='Example Image' title='Free example image' src='/img/62838.jpg'>\n\t</a>";
+		md = HTML2Markdown(html, {"inlineStyle": false});
 		expect(md).toEqual(expected);
+		
 	});
 
 	it("should output only text of empty links", function() {
 		var md = HTML2Markdown("<a href=''>Empty Link Text</a>", {"inlineStyle": true});		
 		var expected = "Empty Link Text";
-		console.log(md);
-		console.log(expected);
 		expect(md).toEqual(expected);
 	});
 	
 	//tags that have no parsing rules e.g. form elements 'head', 'style', script', 'link' 'option', 'noscript', 'noframes', 'input', 'button', 'select', 'textarea', and 'label'
-	var html1 = "<head><link rel='openid.delegate' href='http://jeresig.livejournal.com/'/>";
-	html1 +=	"<script src='http://ejohn.org/files/retweet.js'></script></head>";
 	it("should not convert any elements that have no parsing rules. ", function() {
-		var md = HTML2Markdown(html1);
+		var html = "<head><link rel='openid.delegate' href='http://jeresig.livejournal.com/'/>";
+		html +=	"<script src='http://ejohn.org/files/retweet.js'></script></head>";
+
+		var md = HTML2Markdown(html);
 		expect(md).toEqual("");
 	});	
 	
@@ -297,8 +273,7 @@ describe("HTML2Markdown", function() {
 		html += "<tr><td>Row 2 Cell 1</td><td>Row 2 Cell 2</td></tr>";
 		html += "</table>";
 		
-		var md = HTML2Markdown(html);		
-		console.log(md);
+		var md = HTML2Markdown(html);
 		
 		var expected = "Row 1 Cell 1\n\n";
 		expected += "Row 1 Cell 2\n\n";
@@ -315,7 +290,6 @@ describe("HTML2Markdown", function() {
 		html += "</table>";
 		
 		var md = HTML2Markdown(html);
-		console.log(md);
 		var expected = "* List Item 1\n* List Item 2\n\n* List Item 3\n* List Item 4\n\n";
 
 		expect(md).toEqual(expected);
@@ -359,15 +333,12 @@ describe("HTML2Markdown", function() {
 	//test empty block element
 	it("should not convert emptyt tags", function() {
 		var md = HTML2Markdown("<div>        </div>");
-		console.log(md);
 		expect(md).toEqual("");
 		
 		md = HTML2Markdown("<h1>        </h1>");
-		console.log(md);
 		expect(md).toEqual("");
 
 		md = HTML2Markdown("<b>        </b>");
-		console.log(md);
 		expect(md).toEqual("");
 	});
 	
@@ -379,7 +350,6 @@ describe("HTML2Markdown", function() {
 		expect(md).toEqual(" a b c d \n\n");
 		
 		md = HTML2Markdown("<div>1</div><div>     a     b     c\n     d    </div>");
-		console.log(md);
 		expect(md).toEqual("1\n\na b c d \n\n");
 		
 		md = HTML2Markdown("<h1>     a     b     c\n     d </h1>");
@@ -398,7 +368,6 @@ describe("HTML2Markdown", function() {
 		html += "comments\n</a>";
 		
 		md = HTML2Markdown(html);
-		console.log(md);	
 		expect(md).toEqual("[32 comments][0]\n\n[0]: "+base+"/blog/line-length-readability#comments");
 	});
 
@@ -420,10 +389,27 @@ describe("HTML2Markdown", function() {
 		html += "	<a href='http://feeds.feedburner.com/baymard'>Subscribe via RSS</a>\n";
 		html += "</p>";
 		
-		var md = HTML2Markdown(html);
-		console.log(md);
+		var md = HTML2Markdown(html);		
+		var expected = "![Feed][0]\n\n[Subscribe via RSS][1]\n\n";
+		expected += "[0]: http://baymard.com/images/feed.png?1332492828\n";
+		expected += "[1]: http://feeds.feedburner.com/baymard";
+		
+		expect(md).toEqual(expected);
 	});
-	
+
+	it("should be able to convert list items with linked images", function() {
+		var html = "before list";
+			html += "<ul>\n";
+			html += "	<li><div class='curve-down'><a href='/ipad/#video'><img src='http://images.apple.com/home/images/promo_video_ipad_launch.png' alt='Watch the new iPad video' width='237' height='155' /><span class='play'></span></a></div></li>";
+			html += "	<li><div class='curve-down'><a href='/iphone/videos/#tv-ads-datenight'><img src='http://images.apple.com/home/images/promo_video_iphone4s_ad.png' alt='Watch the new iPhone TV Ad' width='237' height='155' /><span class='play'></span></a></div></li>";
+			html += "</ul>\n";
+		var md = HTML2Markdown(html);
+		var expected = "before list\n\n";
+		expected += "[![Watch the new iPad video](http://images.apple.com/home/images/promo_video_ipad_launch.png)](http://localhost:5984/ipad/#video)\n\n";
+		expected += "[![Watch the new iPhone TV Ad](http://images.apple.com/home/images/promo_video_iphone4s_ad.png)](http://localhost:5984/iphone/videos/#tv-ads-datenight)\n\n";
+		expect(md).toEqual(expected);
+	});
+
 	//getNormalizedUrl(...)
 	it("test getNormalizedUrl()", function() {		
 		expect(getNormalizedUrl("http://localhost:5984/html2markdown/")).toEqual("http://localhost:5984/html2markdown/");
@@ -462,6 +448,7 @@ describe("HTML2Markdown", function() {
 		expect(html).toEqual(result);
 	});
 	
+	//TODO add test for block
 	//TODO test bookmarklet links
 	//TODO add test for xss protection
 	//TODO test parsing of iframe/frame element
