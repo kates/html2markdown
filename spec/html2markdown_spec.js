@@ -397,7 +397,7 @@ describe("HTML2Markdown", function() {
 		expect(md).toEqual(expected);
 	});
 
-	it("should be able to convert list items with linked images", function() {
+	it("should be able to convert list items with linked images as only linked images", function() {
 		var html = "before list";
 			html += "<ul>\n";
 			html += "	<li><div class='curve-down'><a href='/ipad/#video'><img src='http://images.apple.com/home/images/promo_video_ipad_launch.png' alt='Watch the new iPad video' width='237' height='155' /><span class='play'></span></a></div></li>";
@@ -410,6 +410,18 @@ describe("HTML2Markdown", function() {
 		expect(md).toEqual(expected);
 	});
 
+	it("should be able to convert title", function() {
+		var html = "<hgroup>\n";
+		html += "\t<h1><a href='http://www.google.com'>Nathen Harvey</a></h1>\n";
+		html += "\t<h2>a blog</h2>\n";
+		html += "</hgroup>";
+		var md = HTML2Markdown(html);
+		console.log(md);
+		var expected = "\#H1 Nathen Harvey\n\n##H2 a blog\n\n[0]: http://www.google.com";
+		expect(md).toEqual(expected);
+	});
+
+	
 	//getNormalizedUrl(...)
 	it("test getNormalizedUrl()", function() {		
 		expect(getNormalizedUrl("http://localhost:5984/html2markdown/")).toEqual("http://localhost:5984/html2markdown/");
@@ -448,10 +460,11 @@ describe("HTML2Markdown", function() {
 		expect(html).toEqual(result);
 	});
 	
-	//TODO add test for block
+	//TODO add test for block function
 	//TODO test bookmarklet links
 	//TODO add test for xss protection
 	//TODO test parsing of iframe/frame element
 	//TODO add tests to verify hidden nodes are not parsed
 	//TODO add more unit tests based on official markdown syntax
+	//TODO improve formatting of pre/code tags
 });
