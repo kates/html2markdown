@@ -14,11 +14,6 @@
  * 
  */
 
-if (typeof require != "undefined") {
-	var htmlparser = require("./htmldomparser");
-	var HTMLParser = htmlparser.HTMLParser;
-}
-
 /**
  * HTML2Markdown
  * @param html - html string to convert
