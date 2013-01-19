@@ -385,14 +385,14 @@ describe("HTML2Markdown", function() {
 
 	it("should be able to convert image followed by link to markdown that can be renderd using showdown", function() {
 		var html = "<p>\n";
-		html += "	<img alt='Feed' class='icon' src='http://baymard.com/images/feed.png?1332492828'/>\n";
-		html += "	<a href='http://feeds.feedburner.com/baymard'>Subscribe via RSS</a>\n";
+		html += "	<img alt='Feed' class='icon' src='http://mementodb.com/images/logo.png'/>\n";
+		html += "	<a href='http://mementodb.com'>Memento</a>\n";
 		html += "</p>";
 		
 		var md = HTML2Markdown(html);		
-		var expected = "![Feed][0]\n\n[Subscribe via RSS][1]\n\n";
-		expected += "[0]: http://baymard.com/images/feed.png?1332492828\n";
-		expected += "[1]: http://feeds.feedburner.com/baymard";
+		var expected = "![Feed][0]\n\n[Memento][1]\n\n";
+		expected += "[0]: http://mementodb.com/images/logo.png\n";
+		expected += "[1]: http://mementodb.com";
 		
 		expect(md).toEqual(expected);
 	});
@@ -416,12 +416,32 @@ describe("HTML2Markdown", function() {
 		html += "\t<h2>a blog</h2>\n";
 		html += "</hgroup>";
 		var md = HTML2Markdown(html);
-		console.log(md);
-		var expected = "\#H1 Nathen Harvey\n\n##H2 a blog\n\n[0]: http://www.google.com";
+
+		var expected = "# [Nathen Harvey][0]\n\n## a blog\n\n\n\n[0]: http://www.google.com";
 		expect(md).toEqual(expected);
 	});
 
-	
+	it("should be able to convert paragrphs in blocquotes", function() {
+		var html="<blockquote>\n";
+    	html+="\t<p>Lorem ipsum</p>\n";
+  		html+="\t<p>Lorem ipsum</p>\n";
+		html+="</blockquote>";
+
+		var md = HTML2Markdown(html);
+		var expected = "> Lorem ipsum\n\n> Lorem ipsum\n\n";
+		expect(md).toEqual(expected);
+
+		html = "<blockquote>\n";
+    	html+="\t<p>Lorem ipsum</p>\n";
+		html+="</blockquote>\n";
+		html+="<blockquote>\n";
+    	html+="\t<p>Lorem ipsum</p>\n";
+		html+="</blockquote>"
+
+		md = HTML2Markdown(html);
+		expect(md).toEqual(expected);
+	});
+
 	//getNormalizedUrl(...)
 	it("test getNormalizedUrl()", function() {		
 		expect(getNormalizedUrl("http://localhost:5984/html2markdown/")).toEqual("http://localhost:5984/html2markdown/");
