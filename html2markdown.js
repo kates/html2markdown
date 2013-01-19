@@ -284,7 +284,6 @@ function HTML2Markdown(html, opts) {
 				case "blockquote":
 					block();
 					blockquoteStack.push(markdownTags[tag]);
-					nodeList.push(blockquoteStack.join(""));
 					break;
 				case "pre":
 				case "code":
@@ -312,6 +311,10 @@ function HTML2Markdown(html, opts) {
 					console.log("text: "+ text);
 				}
 				
+				if(blockquoteStack.length > 0) {
+					nodeList.push(blockquoteStack.join(""));	
+				}
+
 				nodeList.push(text);
 			},
 			end: function(tag) {
