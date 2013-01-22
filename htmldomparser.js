@@ -46,9 +46,10 @@ var HTMLParser = function(node, handler, opts) {
 					if (c[i].hasChildNodes()) {
 						handler.start(c[i].nodeName, attrs, false);
 
-						if (c[i].nodeName.toLowerCase() == "pre" || c[i].nodeName.toLowerCase() == "code") {
-							handler.chars(c[i].innerHTML);
-						} else if (c[i].nodeName.toLowerCase() == "iframe" || c[i].nodeName.toLowerCase() == "frame") {
+						//if (c[i].nodeName.toLowerCase() == "pre" || c[i].nodeName.toLowerCase() == "code") {
+						//	handler.chars(c[i].innerHTML);
+						//} else 
+						if (c[i].nodeName.toLowerCase() == "iframe" || c[i].nodeName.toLowerCase() == "frame") {
 							if (c[i].contentDocument && c[i].contentDocument.documentElement) {
 								return HTMLParser(c[i].contentDocument.documentElement, handler, opts);
 							}
@@ -74,6 +75,7 @@ var HTMLParser = function(node, handler, opts) {
 			}
 		} catch (e) {
 			//properly log error	
+			console.error(e);
 			console.log("error while parsing node: " + c[i].nodeName.toLowerCase());
 		}
 	}
