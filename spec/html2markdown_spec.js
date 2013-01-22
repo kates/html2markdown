@@ -295,41 +295,6 @@ describe("HTML2Markdown", function() {
 		expect(md).toEqual(expected);
 	});	
 	
-	it("should be able to convert pre block", function() {
-		var html = "<pre>";
-		html += "	void main(String[] args) {\n";
-		html += "		System.out.println(\"Hello Markdown\");\n";
-		html += "	}";
-		html += "</pre>";
-
-		var expected = "    " + "	void main(String[] args) {\n";
-		expected += "    " + "		System.out.println(\"Hello Markdown\");\n";
-		expected += "    " + "	}";
-		expected += "\n\n";
-		
-		var md = HTML2Markdown(html);		
-
-		expect(md).toEqual(expected);
-	});
-
-	it("should be able to convert pre block with html tags", function() {
-		var html = "<pre>\n";
-		html += "<div>\n";
-		html += "	<span>this is span inside pre block</span>\n";
-		html += "	<p>this is paragraph inside pre block</p>\n";		
-		html += "</div>";
-		html += "</pre>";
-		
-		var expected = "    " + "<div>\n";
-		expected += "    " + "	<span>this is span inside pre block</span>\n";
-		expected += "    " + "	<p>this is paragraph inside pre block</p>\n";		
-		expected += "    " + "</div>";
-		expected += "\n\n";
-		var md = HTML2Markdown(html);		
-
-		expect(md).toEqual(expected);
-	});
-
 	//test empty block element
 	it("should not convert emptyt tags", function() {
 		var md = HTML2Markdown("<div>        </div>");
@@ -440,6 +405,56 @@ describe("HTML2Markdown", function() {
 
 		md = HTML2Markdown(html);
 		expect(md).toEqual(expected);
+	});
+
+	it("should be able to convert pre block", function() {
+		var html = "<pre>";
+		html += "	void main(String[] args) {\n";
+		html += "		System.out.println(\"Hello Markdown\");\n";
+		html += "	}";
+		html += "</pre>";
+
+		var expected = "    " + "	void main(String[] args) {\n";
+		expected += "    " + "		System.out.println(\"Hello Markdown\");\n";
+		expected += "    " + "	}";
+		expected += "\n\n";
+		
+		var md = HTML2Markdown(html);		
+		expect(md).toEqual(expected);
+	});
+
+	it("should be able to convert pre block with html tags", function() {
+		var html = "<pre>\n";
+		html += "<div a=\"b\">\n";
+		html += "	<span>this is span inside pre block</span>\n";
+		html += "	this is paragraph inside pre block\n";		
+		html += "</div>";
+		html += "</pre>";
+		
+		var expected = "    " + "\n\n\n";
+		expected += "    " + "	this is span inside pre block\n";
+		expected += "    " + "	this is paragraph inside pre block\n";		
+		expected += "    " + "\n";
+		expected += "\n";
+
+		var md = HTML2Markdown(html);				
+		expect(md).toEqual(expected);
+	});
+
+	it("should be able to convert <pre><code>...</code></pre> blocks", function() {
+		var html= "<pre><code>{% blockquote [author[, source]] [link] [source_link_title] %}";
+		html+= "\nQuote string";
+		html+= "\n{% endblockquote %}";
+		html+= "\n</code></pre>";
+
+		var md = HTML2Markdown(html);
+		expected="    {% blockquote [author[, source]] [link] [source_link_title] %}";
+        expected+="\n    Quote string";
+        expected+="\n    {% endblockquote %}";
+        expected+="\n    ";
+        expected+="\n\n";
+
+        expect(md).toEqual(expected);
 	});
 
 	//getNormalizedUrl(...)
