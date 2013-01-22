@@ -26,7 +26,8 @@ function HTML2Markdown(html, opts) {
 	var linkAttrStack = [];
 	var blockquoteStack = [];
 	var preStack = [];
-	
+	var codeStack = [];
+
 	var links = [];
 	
 	opts = opts || {};
@@ -179,8 +180,8 @@ function HTML2Markdown(html, opts) {
 				if(unary && (tag != "br" && tag != "hr" && tag != "img")) {
 					return;
 				}
-				
-				switch (tag) {
+			
+			switch (tag) {
 				case "br":
 					nodeList.push(markdownTags[tag]);
 					break;
@@ -207,8 +208,12 @@ function HTML2Markdown(html, opts) {
 				case "cite":
 					nodeList.push(markdownTags[tag]);
 					break;
+				case "code":
 				case "span":
-					if(! /\s+$/.test(peek(nodeList))) {
+					if(preStack.length > 0)
+					{
+						break;
+					} else if(! /\s+$/.test(peek(nodeList))) {
 						nodeList.push(markdownTags[tag]);	
 					}
 					break;
@@ -282,19 +287,20 @@ function HTML2Markdown(html, opts) {
 					}
 					break;	
 				case "blockquote":
+					//listBlock();
 					block();
 					blockquoteStack.push(markdownTags[tag]);
 					break;
 				case "pre":
-				case "code":
 					block();
 					preStack.push(true);
+					nodeList.push("    ");
 					break;
 				}				
 			},
 			chars: function(text) {			
 				if(preStack.length > 0) {
-					text = "    " + text.replace(/\n/g,"\n    ");
+					text = text.replace(/\n/g,"\n    ");
 				} else if(text.trim() != "") {
 					text = text.replace(/\s+/g, " ");
 					
@@ -311,7 +317,8 @@ function HTML2Markdown(html, opts) {
 					console.log("text: "+ text);
 				}
 				
-				if(blockquoteStack.length > 0) {
+				//if(blockquoteStack.length > 0 && peekTillNotEmpty(nodeList).endsWith("\n")) {
+				if(blockquoteStack.length > 0) {	
 					nodeList.push(blockquoteStack.join(""));	
 				}
 
@@ -322,7 +329,8 @@ function HTML2Markdown(html, opts) {
 				if(logging) {
 					console.log("end: "+ tag);
 				}
-				switch (tag) {				
+
+			switch (tag) {				
 				case "title":	
 				case "h1":
 				case "h2":
@@ -426,18 +434,17 @@ function HTML2Markdown(html, opts) {
 					blockquoteStack.pop();
 					break;
 				case "pre":
-				case "code":
 					block(true);
 					preStack.pop();	
 					break;
+				case "code":
 				case "span":
-					if(peek(nodeList).trim() == "") {
+					if(preStack.length > 0)
+					{
+						break;
+					} else if(peek(nodeList).trim() == "") {
 						nodeList.pop();
-						if(peek(nodeList) == " ") {
-							nodeList.pop();	
-						} else {
-							nodeList.push(markdownTags[tag]);
-						}						
+						nodeList.push(markdownTags[tag]);					
 					} else {
 						var text = nodeList.pop();
 						nodeList.push(text.trim());
