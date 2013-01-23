@@ -219,7 +219,7 @@ function HTML2Markdown(html, opts) {
 					break;
 				case "p":
 				case "div":				
-				case "td":
+				//case "td":
 					block();
 					break;
 				case "ul":
@@ -296,6 +296,21 @@ function HTML2Markdown(html, opts) {
 					preStack.push(true);
 					nodeList.push("    ");
 					break;
+				case "table":
+					nodeList.push("<table>");
+					break;
+				case "thead":
+					nodeList.push("<thead>");
+					break;	
+				case "tbody":
+					nodeList.push("<tbody>");
+					break;
+				case "tr":
+					nodeList.push("<tr>");
+					break;
+				case "td":
+					nodeList.push("<td>");
+					break;
 				}				
 			},
 			chars: function(text) {			
@@ -344,7 +359,7 @@ function HTML2Markdown(html, opts) {
 					break;
 				case "p":
 				case "div":
-				case "td":
+				//case "td":
 					while(nodeList.length > 0 && peek(nodeList).trim() == "") {
 						nodeList.pop();
 					}
@@ -434,6 +449,44 @@ function HTML2Markdown(html, opts) {
 					blockquoteStack.pop();
 					break;
 				case "pre":
+					//uncomment following experimental code to discard line numbers when syntax highlighters are used
+					//notes this code thorough testing before production user
+					/*
+					var p=[];
+					var flag = true;
+					var count = 0, whiteSpace = 0, line = 0;
+					console.log(">> " + peek(nodeList));
+					while(peek(nodeList).startsWith("    ") || flag == true)
+					{
+						//console.log('inside');	
+						var text = nodeList.pop();
+						p.push(text);
+						
+						if(flag == true && !text.startsWith("    ")) {
+							continue;
+						} else {
+							flag = false;
+						}
+
+						//var result = parseInt(text.trim());
+						if(!isNaN(text.trim())) {
+							count++;
+						} else if(text.trim() == ""){
+							whiteSpace++;
+						} else {
+							line++;
+						}
+						flag = false;
+					}
+
+					console.log(line);
+					if(line != 0)
+					{
+						while(p.length != 0) {
+							nodeList.push(p.pop());
+						}
+					}
+					*/
 					block(true);
 					preStack.pop();	
 					break;
@@ -450,13 +503,26 @@ function HTML2Markdown(html, opts) {
 						nodeList.push(text.trim());
 						nodeList.push(markdownTags[tag]);													
 					}
-					break;					
+					break;
+				case "table":
+					nodeList.push("</table>");
+					break;
+				case "thead":
+					nodeList.push("</thead>");
+					break;	
+				case "tbody":
+					nodeList.push("</tbody>");
+					break;
+				case "tr":
+					nodeList.push("</tr>");
+					break;
+				case "td":
+					nodeList.push("</td>");
+					break;						
 				case "br":
 				case "hr":
 				case "img":
-				case "table":	
-				case "tr":
-					break;
+					break;				
 				}
 				
 			}
