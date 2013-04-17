@@ -295,41 +295,6 @@ describe("HTML2Markdown", function() {
 		expect(md).toEqual(expected);
 	});	
 	
-	it("should be able to convert pre block", function() {
-		var html = "<pre>";
-		html += "	void main(String[] args) {\n";
-		html += "		System.out.println(\"Hello Markdown\");\n";
-		html += "	}";
-		html += "</pre>";
-
-		var expected = "    " + "	void main(String[] args) {\n";
-		expected += "    " + "		System.out.println(\"Hello Markdown\");\n";
-		expected += "    " + "	}";
-		expected += "\n\n";
-		
-		var md = HTML2Markdown(html);		
-
-		expect(md).toEqual(expected);
-	});
-
-	it("should be able to convert pre block with html tags", function() {
-		var html = "<pre>\n";
-		html += "<div>\n";
-		html += "	<span>this is span inside pre block</span>\n";
-		html += "	<p>this is paragraph inside pre block</p>\n";		
-		html += "</div>";
-		html += "</pre>";
-		
-		var expected = "    " + "<div>\n";
-		expected += "    " + "	<span>this is span inside pre block</span>\n";
-		expected += "    " + "	<p>this is paragraph inside pre block</p>\n";		
-		expected += "    " + "</div>";
-		expected += "\n\n";
-		var md = HTML2Markdown(html);		
-
-		expect(md).toEqual(expected);
-	});
-
 	//test empty block element
 	it("should not convert emptyt tags", function() {
 		var md = HTML2Markdown("<div>        </div>");
@@ -385,19 +350,19 @@ describe("HTML2Markdown", function() {
 
 	it("should be able to convert image followed by link to markdown that can be renderd using showdown", function() {
 		var html = "<p>\n";
-		html += "	<img alt='Feed' class='icon' src='http://baymard.com/images/feed.png?1332492828'/>\n";
-		html += "	<a href='http://feeds.feedburner.com/baymard'>Subscribe via RSS</a>\n";
+		html += "	<img alt='Feed' class='icon' src='http://mementodb.com/images/logo.png'/>\n";
+		html += "	<a href='http://mementodb.com'>Memento</a>\n";
 		html += "</p>";
 		
 		var md = HTML2Markdown(html);		
-		var expected = "![Feed][0]\n\n[Subscribe via RSS][1]\n\n";
-		expected += "[0]: http://baymard.com/images/feed.png?1332492828\n";
-		expected += "[1]: http://feeds.feedburner.com/baymard";
+		var expected = "![Feed][0]\n\n[Memento][1]\n\n";
+		expected += "[0]: http://mementodb.com/images/logo.png\n";
+		expected += "[1]: http://mementodb.com";
 		
 		expect(md).toEqual(expected);
 	});
 
-	it("should be able to convert list items with linked images", function() {
+	it("should be able to convert list items with linked images as only linked images", function() {
 		var html = "before list";
 			html += "<ul>\n";
 			html += "	<li><div class='curve-down'><a href='/ipad/#video'><img src='http://images.apple.com/home/images/promo_video_ipad_launch.png' alt='Watch the new iPad video' width='237' height='155' /><span class='play'></span></a></div></li>";
@@ -408,6 +373,88 @@ describe("HTML2Markdown", function() {
 		expected += "[![Watch the new iPad video](http://images.apple.com/home/images/promo_video_ipad_launch.png)](http://localhost:5984/ipad/#video)\n\n";
 		expected += "[![Watch the new iPhone TV Ad](http://images.apple.com/home/images/promo_video_iphone4s_ad.png)](http://localhost:5984/iphone/videos/#tv-ads-datenight)\n\n";
 		expect(md).toEqual(expected);
+	});
+
+	it("should be able to convert title", function() {
+		var html = "<hgroup>\n";
+		html += "\t<h1><a href='http://www.google.com'>Nathen Harvey</a></h1>\n";
+		html += "\t<h2>a blog</h2>\n";
+		html += "</hgroup>";
+		var md = HTML2Markdown(html);
+
+		var expected = "# [Nathen Harvey][0]\n\n## a blog\n\n\n\n[0]: http://www.google.com";
+		expect(md).toEqual(expected);
+	});
+
+	it("should be able to convert paragrphs in blocquotes", function() {
+		var html="<blockquote>\n";
+    	html+="\t<p>Lorem ipsum</p>\n";
+  		html+="\t<p>Lorem ipsum</p>\n";
+		html+="</blockquote>";
+
+		var md = HTML2Markdown(html);
+		var expected = "> Lorem ipsum\n\n> Lorem ipsum\n\n";
+		expect(md).toEqual(expected);
+
+		html = "<blockquote>\n";
+    	html+="\t<p>Lorem ipsum</p>\n";
+		html+="</blockquote>\n";
+		html+="<blockquote>\n";
+    	html+="\t<p>Lorem ipsum</p>\n";
+		html+="</blockquote>"
+
+		md = HTML2Markdown(html);
+		expect(md).toEqual(expected);
+	});
+
+	it("should be able to convert pre block", function() {
+		var html = "<pre>";
+		html += "	void main(String[] args) {\n";
+		html += "		System.out.println(\"Hello Markdown\");\n";
+		html += "	}";
+		html += "</pre>";
+
+		var expected = "    " + "	void main(String[] args) {\n";
+		expected += "    " + "		System.out.println(\"Hello Markdown\");\n";
+		expected += "    " + "	}";
+		expected += "\n\n";
+		
+		var md = HTML2Markdown(html);		
+		expect(md).toEqual(expected);
+	});
+
+	it("should be able to convert pre block with html tags", function() {
+		var html = "<pre>\n";
+		html += "<div a=\"b\">\n";
+		html += "	<span>this is span inside pre block</span>\n";
+		html += "	this is paragraph inside pre block\n";		
+		html += "</div>";
+		html += "</pre>";
+		
+		var expected = "    " + "\n\n\n";
+		expected += "    " + "	this is span inside pre block\n";
+		expected += "    " + "	this is paragraph inside pre block\n";		
+		expected += "    " + "\n";
+		expected += "\n";
+
+		var md = HTML2Markdown(html);				
+		expect(md).toEqual(expected);
+	});
+
+	it("should be able to convert <pre><code>...</code></pre> blocks", function() {
+		var html= "<pre><code>{% blockquote [author[, source]] [link] [source_link_title] %}";
+		html+= "\nQuote string";
+		html+= "\n{% endblockquote %}";
+		html+= "\n</code></pre>";
+
+		var md = HTML2Markdown(html);
+		expected="    {% blockquote [author[, source]] [link] [source_link_title] %}";
+        expected+="\n    Quote string";
+        expected+="\n    {% endblockquote %}";
+        expected+="\n    ";
+        expected+="\n\n";
+
+        expect(md).toEqual(expected);
 	});
 
 	//getNormalizedUrl(...)
@@ -448,10 +495,11 @@ describe("HTML2Markdown", function() {
 		expect(html).toEqual(result);
 	});
 	
-	//TODO add test for block
+	//TODO add test for block function
 	//TODO test bookmarklet links
 	//TODO add test for xss protection
 	//TODO test parsing of iframe/frame element
 	//TODO add tests to verify hidden nodes are not parsed
 	//TODO add more unit tests based on official markdown syntax
+	//TODO improve formatting of pre/code tags
 });
