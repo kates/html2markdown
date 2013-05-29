@@ -229,7 +229,7 @@ function HTML2Markdown(html, opts) {
 			dom = html;
 
 			if(typeof require === 'function' && typeof HTMLParser === 'undefined') {
-				var HTMLParser = require('./htmlparser');
+				HTMLParser = require('./htmlparser');
 			}
 		}
 
