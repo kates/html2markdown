@@ -1,18 +1,24 @@
 # HTML2Markdown
 
-Javascript Implementation for converting HTML to Markdown text.
+Javascript implementation for converting HTML to Markdown text. Browser and Node.js support.
+
+## Installation
+
+    npm install html2markdown
 
 ## Usage
 
-Invoke it as following 
+Invoke it as following
 
-        var md = HTML2Markdown("<h1>H1</h1>");
-        
+    var md = HTML2Markdown("<h1>H1</h1>");
+
 This call will return convert the html and return the mardown string like ""# H1\n\n"
+
+In the browser make sure to include both `html2markdown.js` and `htmldomparser.js`.
 
 ## Changes in this implementation
 
-* Added new htmldomparser. A simple html parser implementation that assumes parsing is done in browser. Shold be compatible with john Resig's parser. 
+* Added new htmldomparser. A simple html parser implementation that assumes parsing is done in browser. Shold be compatible with john Resig's parser.
 * Parser implementation provided support for ignoring tags that you do not want to convert.
 * Parser also has an option to ignore dom elements with hidden styles.
 * Added rules for parsing PRE, CODE, SPAN, DIV, TD,  DL, DT
@@ -28,10 +34,10 @@ This call will return convert the html and return the mardown string like ""# H1
 
 ## Known conversion issues
 
-If HTML tag is of following form. Then, currently showdown fails to render 
+If HTML tag is of following form. Then, currently showdown fails to render
 
         <a href="/some_link">
             <h1>
                     <img src="/some_image_lin"/>
             </h1>
-        </a>                
+        </a>
