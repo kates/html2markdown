@@ -1,16 +1,36 @@
 /*
  * HTMLParser - This implementation of parser assumes we are parsing HTML in browser
  * and user DOM methods available in browser for parsing HTML.
- * 
+ *
  * @author Himanshu Gilani
- * 
+ *
  */
 
-var HTMLParser = function(node, handler, opts) {
+/*
+ Universal JavaScript Module, supports AMD (RequireJS), Node.js, and the browser.
+ https://gist.github.com/kirel/1268753
+*/
+
+(function (name, definition) {
+  if (typeof define === 'function') { // AMD
+    define(definition);
+  } else if (typeof module !== 'undefined' && module.exports) { // Node.js
+    module.exports = definition();
+  } else { // Browser
+    var theModule = definition(), global = this, old = global[name];
+    theModule.noConflict = function () {
+      global[name] = old;
+      return theModule;
+    };
+    global[name] = theModule;
+  }
+})('HTMLParser', function() {
+
+return function(node, handler, opts) {
 	opts = opts || {};
 	var nodesToIgnore = opts['nodesToIgnore'] || [];
 	var parseHiddenNodes = opts['parseHiddenNodes'] || 'false';
-	
+
 	var c = node.childNodes;
 	for ( var i = 0; i < c.length; i++) {
 		try {
@@ -21,12 +41,12 @@ var HTMLParser = function(node, handler, opts) {
 					break;
 				}
 			}
-			
+
 			//NOTE hidden node testing is expensive in FF.
 			if (ignore || (!parseHiddenNodes && isHiddenNode(c[i]))  ){
 				continue;
-			} 
-			
+			}
+
 			if (c[i].nodeName.toLowerCase() != "#text" && c[i].nodeName.toLowerCase() != "#comment") {
 				var attrs = [];
 
@@ -48,7 +68,7 @@ var HTMLParser = function(node, handler, opts) {
 
 						//if (c[i].nodeName.toLowerCase() == "pre" || c[i].nodeName.toLowerCase() == "code") {
 						//	handler.chars(c[i].innerHTML);
-						//} else 
+						//} else
 						if (c[i].nodeName.toLowerCase() == "iframe" || c[i].nodeName.toLowerCase() == "frame") {
 							if (c[i].contentDocument && c[i].contentDocument.documentElement) {
 								return HTMLParser(c[i].contentDocument.documentElement, handler, opts);
@@ -74,7 +94,7 @@ var HTMLParser = function(node, handler, opts) {
 				}
 			}
 		} catch (e) {
-			//properly log error	
+			//properly log error
 			console.error(e);
 			console.log("error while parsing node: " + c[i].nodeName.toLowerCase());
 		}
@@ -85,7 +105,7 @@ function isHiddenNode(node) {
 	if(node.nodeName.toLowerCase() == "title"){
 		return false;
 	}
-	
+
 	if (window.getComputedStyle) {
 		try {
 			var style = window.getComputedStyle(node, null);
@@ -97,7 +117,7 @@ function isHiddenNode(node) {
 		}
 		return false;
 	}
-} 
+}
 
 //http://blogs.msdn.com/b/aoakley/archive/2003/11/12/49645.aspx
 function HTMLDecode(str) {
@@ -387,7 +407,7 @@ function escapeCharOther(original) {
 		found = false;
 		break;
 	}
-	
+
 	if (!found) {
 		if (thechar > 127) {
 			var c = thechar;
@@ -405,3 +425,5 @@ function escapeCharOther(original) {
 	}
 
 }
+
+});

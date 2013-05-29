@@ -221,12 +221,16 @@ function HTML2Markdown(html, opts) {
 
 	try {
 		var dom;
-		if(html) {
-		var e = document.createElement('div');
+		if(html && typeof window !== 'undefined') {
+			var e = document.createElement('div');
 			e.innerHTML = html;
 			dom = e;
 		} else {
-			dom = window.document.body;
+			dom = html;
+
+			if(typeof require === 'function' && typeof HTMLParser === 'undefined') {
+				var HTMLParser = require('./htmlparser');
+			}
 		}
 
 		HTMLParser(dom,{
