@@ -171,34 +171,31 @@ for(var key in parsers) {
 		});
 
 
-		var base = location.protocol+"//"+location.hostname;
-		location.port != 80 ? base += ":" + location.port : true;
-
 		it("should be able to convert images inline style", function() {
 			var md = markdown("<img alt=\"Example Image\" title=\"Free example image\" src=\"/img/62838.jpg\"/>", {"inlineStyle": true});
-			var expected = "![Example Image]("+base+"/img/62838.jpg \"Free example image\")\n\n";
+			var expected = "![Example Image](/img/62838.jpg \"Free example image\")\n\n";
 			expect(md).toEqual(expected);
 		});
 
 		it("should be able to convert images reference style", function() {
 			var md = markdown("<img alt=\"Example Image\" title=\"Free example image\" src=\"/img/62838.jpg\"/>");
-			var expected = "![Example Image][0]\n\n[0]: http://localhost:5984/img/62838.jpg";
+			var expected = "![Example Image][0]\n\n[0]: /img/62838.jpg";
 			expect(md).toEqual(expected);
 
 			//if alt is empty then title should be used
 			md = markdown("<img title=\"Free example image title\" src=\"/img/62838.jpg\">");
-			var expected = "![Free example image title][0]\n\n[0]: http://localhost:5984/img/62838.jpg";
+			var expected = "![Free example image title][0]\n\n[0]: /img/62838.jpg";
 			expect(md).toEqual(expected);
 
 		});
 
 		it("should be able to convert images as block elements", function() {
 			var md = markdown("before<img alt=\"Example Image\" title=\"Free example image\" src=\"/img/62838.jpg\"/>after");
-			var expected = "before\n\n![Example Image][0]\n\nafter\n\n[0]: http://localhost:5984/img/62838.jpg";
+			var expected = "before\n\n![Example Image][0]\n\nafter\n\n[0]: /img/62838.jpg";
 			expect(md).toEqual(expected);
 
 			var md = markdown("before<img alt=\"Example Image\" title=\"Free example image\" src=\"/img/62838.jpg\"/>after", {"inlineStyle": true});
-			var expected = "before\n\n![Example Image]("+base+"/img/62838.jpg \"Free example image\")\n\nafter";
+			var expected = "before\n\n![Example Image](/img/62838.jpg \"Free example image\")\n\nafter";
 			expect(md).toEqual(expected);
 		});
 
@@ -255,13 +252,13 @@ for(var key in parsers) {
 
 		it("should convert image wrapped in anchor to markdown that can be rendered using showdown - inline style parsing", function() {
 			var md = markdown("<a href=\"/exec/j/4/?pid=62838&lno=1&afsrc=1\"><img alt=\"Example Image\" title=\"Free example image\" src=\"/img/62838.jpg\"></a>", {"inlineStyle": true});
-			var expected = "[![Example Image]("+ base +"/img/62838.jpg \"Free example image\")]("+base+"/exec/j/4/?pid=62838&lno=1&afsrc=1)";
+			var expected = "[![Example Image](/img/62838.jpg \"Free example image\")](/exec/j/4/?pid=62838&lno=1&afsrc=1)";
 			expect(md).toEqual(expected);
 		});
 
 		it("should convert image wrapped in anchor to markdown that can be rendered using showdown - reference style parsing", function() {
 			var md = markdown("<a href='/exec/j/4/?pid=62838&lno=1&afsrc=1'><img alt='Example Image' title='Free example image' src='/img/62838.jpg'></a>", {"inlineStyle": false});
-			var expected = "[![Example Image]("+ base +"/img/62838.jpg \"Free example image\")]("+base+"/exec/j/4/?pid=62838&lno=1&afsrc=1)";
+			var expected = "[![Example Image](/img/62838.jpg \"Free example image\")](/exec/j/4/?pid=62838&lno=1&afsrc=1)";
 
 			var html = "<a href='/exec/j/4/?pid=62838&lno=1&afsrc=1'>\n\t<img alt='Example Image' title='Free example image' src='/img/62838.jpg'>\n\t</a>";
 			md = markdown(html, {"inlineStyle": false});
@@ -351,18 +348,18 @@ for(var key in parsers) {
 			html += "comments\n</a>";
 
 			md = markdown(html);
-			expect(md).toEqual("[32 comments][0]\n\n[0]: "+base+"/blog/line-length-readability#comments");
+			expect(md).toEqual("[32 comments][0]\n\n[0]: /blog/line-length-readability#comments");
 		});
 
 		it("should trim image alt and title", function() {
 			var html = "<img alt=\"  Example Image   \" title=\"   Free example image   \" src=\"/img/62838.jpg\">";
 
 			var md = markdown(html, {"inlineStyle": true});
-			var expected = "![Example Image]("+base+"/img/62838.jpg \"Free example image\")\n\n";
+			var expected = "![Example Image](/img/62838.jpg \"Free example image\")\n\n";
 			expect(md).toEqual(expected);
 
 			md = markdown(html);
-			expected = "![Example Image][0]\n\n[0]: http://localhost:5984/img/62838.jpg";
+			expected = "![Example Image][0]\n\n[0]: /img/62838.jpg";
 			expect(md).toEqual(expected);
 		});
 
@@ -388,8 +385,8 @@ for(var key in parsers) {
 				html += "</ul>\n";
 			var md = markdown(html);
 			var expected = "before list\n\n";
-			expected += "[![Watch the new iPad video](http://images.apple.com/home/images/promo_video_ipad_launch.png)](http://localhost:5984/ipad/#video)\n\n";
-			expected += "[![Watch the new iPhone TV Ad](http://images.apple.com/home/images/promo_video_iphone4s_ad.png)](http://localhost:5984/iphone/videos/#tv-ads-datenight)\n\n";
+			expected += "[![Watch the new iPad video](http://images.apple.com/home/images/promo_video_ipad_launch.png)](/ipad/#video)\n\n";
+			expected += "[![Watch the new iPhone TV Ad](http://images.apple.com/home/images/promo_video_iphone4s_ad.png)](/iphone/videos/#tv-ads-datenight)\n\n";
 			expect(md).toEqual(expected);
 		});
 
@@ -476,19 +473,6 @@ for(var key in parsers) {
 		});
 	});
 }
-
-describe("getNormalizedUrl", function() {
-	var base = location.protocol+"//"+location.hostname;
-	var getNormalizedUrl = html2markdown.getNormalizedUrl;
-	location.port != 80 ? base += ":" + location.port : true;
-
-	it("test works", function() {
-		expect(getNormalizedUrl("http://localhost:5984/html2markdown/")).toEqual("http://localhost:5984/html2markdown/");
-		expect(getNormalizedUrl("/html2markdown/")).toEqual(base + "/html2markdown/");
-		expect(getNormalizedUrl("page")).toMatch(/\/page$/);
-		expect(getNormalizedUrl("/img/62838.jpg")).toEqual(base + "/img/62838.jpg");
-	});
-});
 
 describe("markdownDOMParser", function() {
 	it("parser function should be able to echo input html", function() {

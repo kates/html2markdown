@@ -52,32 +52,6 @@ function startsWith(value, str) {
 	return value.indexOf(str) == 0;
 }
 
-function getNormalizedUrl(s) {
-	var urlBase = location.href;
-	var urlDir  = urlBase.replace(/\/[^\/]*$/, '/');
-	var urlPage = urlBase.replace(/#[^\/#]*$/, '');
-
-	var url;
-	if(/^[a-zA-Z]([a-zA-Z0-9 -.])*:/.test(s)) {
-		// already absolute url
-		url = s;
-	} else if(/^\x2f/.test(s)) {// %2f --> /
-		// url is relative to site
-		location.protocol != "" ? url = location.protocol + "//" : url ="";
-		url+= location.hostname;
-		if(location.port != "80") {
-			url+=":"+location.port;
-		}
-		url += s;
-	} else if(/^#/.test(s)) {
-		// url is relative to page
-		url = urlPage + s;
-	} else {
-		url = urlDir + s;
-	}
-	return encodeURI(url);
-}
-
 function html2markdown(html, opts) {
 	opts = opts || {};
 
@@ -294,7 +268,7 @@ function html2markdown(html, opts) {
 				var attribs = convertAttrs(attrs);
 				var alt, title, url;
 
-				attribs["src"] ? url = getNormalizedUrl(attribs["src"].value) : url = "";
+				attribs["src"] ? url = attribs["src"].value : url = "";
 				if(!url) {
 					break;
 				}
@@ -429,7 +403,7 @@ function html2markdown(html, opts) {
 
 				var attrs = linkAttrStack.pop();
 				var url;
-				attrs["href"] &&  attrs["href"].value != "" ? url = getNormalizedUrl(attrs["href"].value) : url = "";
+				attrs["href"] &&  attrs["href"].value != "" ? url = attrs["href"].value : url = "";
 
 				if(url == "") {
 					nodeList.pop();
@@ -583,8 +557,6 @@ function html2markdown(html, opts) {
 	return nodeList.join("");
 
 }
-
-html2markdown.getNormalizedUrl = getNormalizedUrl;
 
 return html2markdown;
 
