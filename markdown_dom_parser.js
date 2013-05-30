@@ -24,10 +24,14 @@
     };
     global[name] = theModule;
   }
-})('HTMLParser', function() {
+})('markdownDOMParser', function() {
 
-return function(node, handler, opts) {
+return function(html, handler, opts) {
 	opts = opts || {};
+
+	var e = document.createElement('div');
+	e.innerHTML = html;
+	var node = e;
 	var nodesToIgnore = opts['nodesToIgnore'] || [];
 	var parseHiddenNodes = opts['parseHiddenNodes'] || 'false';
 

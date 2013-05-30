@@ -6,15 +6,20 @@ Javascript implementation for converting HTML to Markdown text. Browser and Node
 
     npm install html2markdown
 
-## Usage
+## Usage in node.js
 
-Invoke it as following
+    var html2markdown = require('html2markdown');
 
-    var md = HTML2Markdown("<h1>H1</h1>");
+    console.log(html2markdown('<h1>Hello markdown!</h1>'));
+
+## Usage in browser
+
+    <script type="text/javascript" src="markdown_dom_parser.js"></script>
+    <script type="text/javascript" src="html2markdown.js"></script>
+
+    console.log(html2markdown("<h1>Hello markdown!</h1>"))
 
 This call will return convert the html and return the mardown string like ""# H1\n\n"
-
-In the browser make sure to include both `html2markdown.js` and `htmldomparser.js`.
 
 ## Changes in this implementation
 

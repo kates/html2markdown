@@ -41,7 +41,7 @@
     };
     global[name] = theModule;
   }
-})('HTMLParser', function() {
+})('markdownHTMLParser', function() {
 
 	// Regular Expressions for parsing tags and attributes
 	var startTag = /^<(\w+)((?:\s+\w+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/,
