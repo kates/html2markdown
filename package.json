@@ -1,0 +1,17 @@
+{
+  "name": "html2markdown",
+  "version": "1.1.0",
+  "description": "An HTML to Markdown converter.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/alexgorbatchev/html2markdown.git"
+  },
+  "keywords": [
+    "html",
+    "markdown"
+  ],
+  "author": "Kates Gasis",
+  "license": "MIT",
+  "readmeFilename": "README.md"
+}
