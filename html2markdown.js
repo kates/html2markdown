@@ -26,18 +26,18 @@
 */
 
 (function (name, definition) {
-  if (typeof define === 'function') { // AMD
-    define(definition);
-  } else if (typeof module !== 'undefined' && module.exports) { // Node.js
-    module.exports = definition();
-  } else { // Browser
-    var theModule = definition(), global = this, old = global[name];
-    theModule.noConflict = function () {
-      global[name] = old;
-      return theModule;
-    };
-    global[name] = theModule;
-  }
+	if (typeof define === 'function') { // AMD
+		define(definition);
+	} else if (typeof module !== 'undefined' && module.exports) { // Node.js
+		module.exports = definition();
+	} else { // Browser
+		var theModule = definition(), global = this, old = global[name];
+		theModule.noConflict = function () {
+			global[name] = old;
+			return theModule;
+		};
+		global[name] = theModule;
+	}
 })('html2markdown', function() {
 
 function trim(value) {
@@ -45,7 +45,7 @@ function trim(value) {
 }
 
 function endsWith(value, suffix) {
-  return value.match(suffix+"$") == suffix;
+	return value.match(suffix+"$") == suffix;
 }
 
 function startsWith(value, str) {
@@ -88,13 +88,14 @@ function html2markdown(html, opts) {
 		"blockquote": "> "
 	};
 
-	if(!parser && typeof markdownDOMParser !== 'undefined')
+	if (!parser && typeof markdownDOMParser !== 'undefined') {
 		parser = markdownDOMParser;
+	}
 
 	function getListMarkdownTag() {
 		var listItem = "";
-		if(listTagStack) {
-			for ( var i = 0; i < listTagStack.length - 1; i++) {
+		if (listTagStack) {
+			for (var i = 0; i < listTagStack.length - 1; i++) {
 				listItem += "  ";
 			}
 		}
@@ -104,7 +105,7 @@ function html2markdown(html, opts) {
 
 	function convertAttrs(attrs) {
 		var attributes = {};
-		for(var k in attrs) {
+		for (var k in attrs) {
 			var attr = attrs[k];
 			attributes[attr.name] = attr;
 		}
@@ -112,19 +113,19 @@ function html2markdown(html, opts) {
 	}
 
 	function peek(list) {
-		if(list && list.length > 0) {
+		if (list && list.length > 0) {
 			return list.slice(-1)[0];
 		}
 		return "";
 	}
 
 	function peekTillNotEmpty(list) {
-		if(!list) {
+		if (!list) {
 			return "";
 		}
 
-		for(var i = list.length - 1; i>=0; i-- ){
-			if(list[i] != "") {
+		for (var i = list.length - 1; i >= 0; i--){
+			if (list[i] != "") {
 				return list[i];
 			}
 		}
@@ -133,8 +134,8 @@ function html2markdown(html, opts) {
 
 	function removeIfEmptyTag(start) {
 		var cleaned = false;
-		if(start == peekTillNotEmpty(nodeList)) {
-			while(peek(nodeList) != start) {
+		if (start == peekTillNotEmpty(nodeList)) {
+			while (peek(nodeList) != start) {
 				nodeList.pop();
 			}
 			nodeList.pop();
@@ -145,7 +146,7 @@ function html2markdown(html, opts) {
 
 	function sliceText(start) {
 		var text = [];
-		while(nodeList.length > 0 && peek(nodeList) != start) {
+		while (nodeList.length > 0 && peek(nodeList) != start) {
 			var t = nodeList.pop();
 			text.unshift(t);
 		}
@@ -158,15 +159,15 @@ function html2markdown(html, opts) {
 			return;
 		}
 
-		if(!isEndBlock) {
+		if (!isEndBlock) {
 			var block;
-			if(/\s*\n\n\s*$/.test(lastItem)) {
+			if (/\s*\n\n\s*$/.test(lastItem)) {
 				lastItem = lastItem.replace(/\s*\n\n\s*$/, "\n\n");
 				block = "";
-			} else if(/\s*\n\s*$/.test(lastItem)) {
+			} else if (/\s*\n\s*$/.test(lastItem)) {
 				lastItem = lastItem.replace(/\s*\n\s*$/, "\n");
 				block = "\n";
-			} else if(/\s+$/.test(lastItem)) {
+			} else if (/\s+$/.test(lastItem)) {
 				block = "\n\n";
 			} else {
 				block = "\n\n";
@@ -176,17 +177,17 @@ function html2markdown(html, opts) {
 			nodeList.push(block);
 		} else {
 			nodeList.push(lastItem);
-			if(!endsWith(lastItem, "\n")) {
+			if (!endsWith(lastItem, "\n")) {
 				nodeList.push("\n\n");
 			}
 		}
- 	}
+	}
 
 	function listBlock() {
-		if(nodeList.length > 0) {
+		if (nodeList.length > 0) {
 			var li = peek(nodeList);
 
-			if(!endsWith(li, "\n")) {
+			if (!endsWith(li, "\n")) {
 				nodeList.push("\n");
 			}
 		} else {
@@ -194,15 +195,15 @@ function html2markdown(html, opts) {
 		}
 	}
 
-	parser(html,{
+	parser(html, {
 		start: function(tag, attrs, unary) {
 			tag = tag.toLowerCase();
 
-			if(unary && (tag != "br" && tag != "hr" && tag != "img")) {
+			if (unary && (tag != "br" && tag != "hr" && tag != "img")) {
 				return;
 			}
 
-		switch (tag) {
+			switch (tag) {
 			case "br":
 				nodeList.push(markdownTags[tag]);
 				break;
@@ -231,10 +232,9 @@ function html2markdown(html, opts) {
 				break;
 			case "code":
 			case "span":
-				if(preStack.length > 0)
-				{
+				if (preStack.length > 0) {
 					break;
-				} else if(! /\s+$/.test(peek(nodeList))) {
+				} else if (!/\s+$/.test(peek(nodeList))) {
 					nodeList.push(markdownTags[tag]);
 				}
 				break;
@@ -248,7 +248,7 @@ function html2markdown(html, opts) {
 			case "dl":
 				listTagStack.push(markdownTags[tag]);
 				// lists are block elements
-				if(listTagStack.length > 1) {
+				if (listTagStack.length > 1) {
 					listBlock();
 				} else {
 					block();
@@ -269,7 +269,7 @@ function html2markdown(html, opts) {
 				var alt, title, url;
 
 				attribs["src"] ? url = attribs["src"].value : url = "";
-				if(!url) {
+				if (!url) {
 					break;
 				}
 
@@ -277,16 +277,16 @@ function html2markdown(html, opts) {
 				attribs['title'] ? title = trim(attribs['title'].value) : title = "";
 
 				// if parent of image tag is nested in anchor tag use inline style
-				if(!inlineStyle && !startsWith(peekTillNotEmpty(nodeList), "[")) {
+				if (!inlineStyle && !startsWith(peekTillNotEmpty(nodeList), "[")) {
 					var l = links.indexOf(url);
-					if(l == -1) {
+					if (l == -1) {
 						links.push(url);
 						l=links.length-1;
 					}
 
 					block();
 					nodeList.push("![");
-					if(alt!= "") {
+					if (alt!= "") {
 						nodeList.push(alt);
 					} else if (title != null) {
 						nodeList.push(title);
@@ -296,13 +296,13 @@ function html2markdown(html, opts) {
 					block();
 				} else {
 					//if image is not a link image then treat images as block elements
-					if(!startsWith(peekTillNotEmpty(nodeList), "[")) {
+					if (!startsWith(peekTillNotEmpty(nodeList), "[")) {
 						block();
 					}
 
 					nodeList.push("![" + alt + "](" + url + (title ? " \"" + title + "\"" : "") + ")");
 
-					if(!startsWith(peekTillNotEmpty(nodeList), "[")) {
+					if (!startsWith(peekTillNotEmpty(nodeList), "[")) {
 						block(true);
 					}
 				}
@@ -335,13 +335,13 @@ function html2markdown(html, opts) {
 			}
 		},
 		chars: function(text) {
-			if(preStack.length > 0) {
+			if (preStack.length > 0) {
 				text = text.replace(/\n/g,"\n    ");
-			} else if(trim(text) != "") {
+			} else if (trim(text) != "") {
 				text = text.replace(/\s+/g, " ");
 
 				var prevText = peekTillNotEmpty(nodeList);
-				if(/\s+$/.test(prevText)) {
+				if (/\s+$/.test(prevText)) {
 					text = text.replace(/^\s+/g, "");
 				}
 			} else {
@@ -350,7 +350,7 @@ function html2markdown(html, opts) {
 			}
 
 			//if(blockquoteStack.length > 0 && peekTillNotEmpty(nodeList).endsWith("\n")) {
-			if(blockquoteStack.length > 0) {
+			if (blockquoteStack.length > 0) {
 				nodeList.push(blockquoteStack.join(""));
 			}
 
@@ -386,7 +386,7 @@ function html2markdown(html, opts) {
 			case "dfn":
 			case "var":
 			case "cite":
-				if(!removeIfEmptyTag(markdownTags[tag])) {
+				if (!removeIfEmptyTag(markdownTags[tag])) {
 					nodeList.push(trim(sliceText(markdownTags[tag])));
 					nodeList.push(markdownTags[tag]);
 				}
@@ -396,7 +396,7 @@ function html2markdown(html, opts) {
 				text = text.replace(/\s+/g, " ");
 				text = trim(text);
 
-				if(text == "") {
+				if (text == "") {
 					nodeList.pop();
 					break;
 				}
@@ -405,7 +405,7 @@ function html2markdown(html, opts) {
 				var url;
 				attrs["href"] &&  attrs["href"].value != "" ? url = attrs["href"].value : url = "";
 
-				if(url == "") {
+				if (url == "") {
 					nodeList.pop();
 					nodeList.push(text);
 					break;
@@ -413,9 +413,9 @@ function html2markdown(html, opts) {
 
 				nodeList.push(text);
 
-				if(!inlineStyle && !startsWith(peek(nodeList), "!")){
+				if (!inlineStyle && !startsWith(peek(nodeList), "!")){
 					var l = links.indexOf(url);
-					if(l == -1) {
+					if (l == -1) {
 						links.push(url);
 						l=links.length-1;
 					}
@@ -445,10 +445,10 @@ function html2markdown(html, opts) {
 			case "li":
 			case "dt":
 				var li = getListMarkdownTag();
-				if(!removeIfEmptyTag(li)) {
+				if (!removeIfEmptyTag(li)) {
 					var text = trim(sliceText(li));
 
-					if(startsWith(text, "[![")) {
+					if (startsWith(text, "[![")) {
 						nodeList.pop();
 						block();
 						nodeList.push(text);
@@ -506,10 +506,9 @@ function html2markdown(html, opts) {
 				break;
 			case "code":
 			case "span":
-				if(preStack.length > 0)
-				{
+				if (preStack.length > 0) {
 					break;
-				} else if(trim(peek(nodeList)) == "") {
+				} else if (trim(peek(nodeList)) == "") {
 					nodeList.pop();
 					nodeList.push(markdownTags[tag]);
 				} else {
@@ -542,9 +541,9 @@ function html2markdown(html, opts) {
 		}
 	}, {"nodesToIgnore": ["script", "noscript", "object", "iframe", "frame", "head", "style", "label"]});
 
-	if(!inlineStyle) {
-		for ( var i = 0; i < links.length; i++) {
-			if(i == 0) {
+	if (!inlineStyle) {
+		for (var i = 0; i < links.length; i++) {
+			if (i == 0) {
 				var lastItem = nodeList.pop();
 				nodeList.push(lastItem.replace(/\s+$/g, ""));
 				nodeList.push("\n\n[" + i + "]: " + links[i]);

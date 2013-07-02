@@ -26,7 +26,7 @@
   }
 })('markdownDOMParser', function() {
 
-return function(html, handler, opts) {
+var HTMLParser = function (html, handler, opts) {
 	opts = opts || {};
 
 	var e = document.createElement('div');
@@ -36,11 +36,11 @@ return function(html, handler, opts) {
 	var parseHiddenNodes = opts['parseHiddenNodes'] || 'false';
 
 	var c = node.childNodes;
-	for ( var i = 0; i < c.length; i++) {
+	for (var i = 0; i < c.length; i++) {
 		try {
 			var ignore = false;
-			for(var k=0; k< nodesToIgnore.length; k++) {
-				if(c[i].nodeName.toLowerCase() == nodesToIgnore[k]) {
+			for (var k=0; k< nodesToIgnore.length; k++) {
+				if (c[i].nodeName.toLowerCase() == nodesToIgnore[k]) {
 					ignore= true;
 					break;
 				}
@@ -77,8 +77,8 @@ return function(html, handler, opts) {
 							if (c[i].contentDocument && c[i].contentDocument.documentElement) {
 								return HTMLParser(c[i].contentDocument.documentElement, handler, opts);
 							}
-						} else if (c[i].hasChildNodes()) {
-							HTMLParser(c[i], handler, opts);
+						} else {
+							HTMLParser(c[i].innerHTML, handler, opts);
 						}
 
 						if (handler.end) {
@@ -97,6 +97,7 @@ return function(html, handler, opts) {
 					handler.comment(c[i].nodeValue);
 				}
 			}
+
 		} catch (e) {
 			//properly log error
 			console.error(e);
@@ -106,7 +107,7 @@ return function(html, handler, opts) {
 };
 
 function isHiddenNode(node) {
-	if(node.nodeName.toLowerCase() == "title"){
+	if (node.nodeName.toLowerCase() == "title"){
 		return false;
 	}
 
@@ -154,7 +155,6 @@ function HTMLEncode(originalText) {
 }
 
 function escapeHtmlTextArea(originalText) {
-
 	var preescape = "" + originalText;
 	var escaped = "";
 
@@ -208,7 +208,6 @@ function escapeTags(original) {
 		break; // "
 	}
 	return original;
-
 }
 
 function escapeCharOther(original) {
@@ -427,7 +426,6 @@ function escapeCharOther(original) {
 			return original;
 		}
 	}
-
 }
-
+return HTMLParser;
 });
