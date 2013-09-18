@@ -240,7 +240,10 @@ function html2markdown(html, opts) {
 				break;
 			case "p":
 			case "div":
-			//case "td":
+			case "table":
+			case "tbody":
+			case "tr":
+			case "td":
 				block();
 				break;
 			case "ul":
@@ -373,7 +376,10 @@ function html2markdown(html, opts) {
 				break;
 			case "p":
 			case "div":
-			//case "td":
+			case "table":
+			case "tbody":
+			case "tr":
+			case "td":
 				while(nodeList.length > 0 && trim(peek(nodeList)) == "") {
 					nodeList.pop();
 				}
