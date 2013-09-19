@@ -46,3 +46,15 @@ If HTML tag is of following form. Then, currently showdown fails to render
                     <img src="/some_image_lin"/>
             </h1>
         </a>
+
+## Testing
+
+### In Node.js
+
+    npm install
+    npm test
+
+### In Browser
+
+Just open `SpecRunner.html` in your browser.
+    
