@@ -5,12 +5,18 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/alexgorbatchev/html2markdown.git"
+    "url": "git://github.com/kates/html2markdown.git"
   },
   "keywords": [
     "html",
     "markdown"
   ],
+  "devDependencies": {
+    "jasmine-node": "*"
+  },
+  "scripts": {
+    "test": "jasmine-node spec"
+  },
   "author": "Kates Gasis",
   "license": "MIT",
   "readmeFilename": "README.md"
