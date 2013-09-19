@@ -8,12 +8,23 @@ var parsers = {
 
 	'html' : function(value, opts) {
 		opts = opts || {};
+
+		if (typeof window == 'undefined') {
+			html2markdown = require('../html2markdown');
+			markdownHTMLParser = require('../markdown_html_parser');
+		}
+
 		opts.parser = markdownHTMLParser;
 		return html2markdown(value, opts);
 	}
 };
 
 for(var key in parsers) {
+	// for testing in node env.
+	if (key == 'dom' && typeof window == 'undefined') {
+		continue;
+	}
+
 	var markdown = parsers[key];
 
 	describe("With " + key + " parser", function() {
